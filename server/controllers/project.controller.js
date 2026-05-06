@@ -21,10 +21,16 @@ export const createProject = async (req, res) => {
       members: [req.user._id]
     });
 
+    await User.findByIdAndUpdate(req.user._id, { role: "Admin" });
+
+    const populatedProject = await Project.findById(project._id)
+      .populate("admin", "name email role")
+      .populate("members", "name email role");
+
     res.status(201).json({
       success: true,
       message: "Project created successfully",
-      project
+      project: populatedProject
     });
   } catch (error) {
     res.status(500).json({
@@ -40,8 +46,8 @@ export const getProjects = async (req, res) => {
     const projects = await Project.find({
       members: req.user._id
     })
-      .populate("admin", "name email")
-      .populate("members", "name email")
+      .populate("admin", "name email role")
+      .populate("members", "name email role")
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -98,8 +104,8 @@ export const addMember = async (req, res) => {
     await project.save();
 
     const updatedProject = await Project.findById(projectId)
-      .populate("admin", "name email")
-      .populate("members", "name email");
+      .populate("admin", "name email role")
+      .populate("members", "name email role");
 
     res.status(200).json({
       success: true,

@@ -8,11 +8,14 @@ import {
   Crown,
   Flag,
   Loader2,
+  Pencil,
   Plus,
   RefreshCcw,
+  Save,
   Trash2,
   UserPlus,
-  Users
+  Users,
+  X
 } from "lucide-react";
 import api from "../api/api";
 import { useAuth } from "../context/AuthContext";
@@ -50,14 +53,27 @@ export default function ProjectDetails() {
   const [taskError, setTaskError] = useState("");
   const [addingMember, setAddingMember] = useState(false);
   const [creatingTask, setCreatingTask] = useState(false);
+  const [removingMemberId, setRemovingMemberId] = useState("");
   const [updatingTaskId, setUpdatingTaskId] = useState("");
   const [deletingTaskId, setDeletingTaskId] = useState("");
+  const [editingTaskId, setEditingTaskId] = useState("");
+  const [savingTaskId, setSavingTaskId] = useState("");
+  const [editTaskError, setEditTaskError] = useState("");
 
   const [taskForm, setTaskForm] = useState({
     title: "",
     description: "",
     dueDate: "",
     priority: "Medium",
+    assignedTo: ""
+  });
+
+  const [editTaskForm, setEditTaskForm] = useState({
+    title: "",
+    description: "",
+    dueDate: "",
+    priority: "Medium",
+    status: "To Do",
     assignedTo: ""
   });
 
@@ -122,6 +138,11 @@ export default function ProjectDetails() {
       return;
     }
 
+    if (!taskForm.dueDate) {
+      setTaskError("Due date is required.");
+      return;
+    }
+
     setCreatingTask(true);
 
     try {
@@ -138,6 +159,77 @@ export default function ProjectDetails() {
       setTaskError(err.response?.data?.message || "Failed to create task");
     } finally {
       setCreatingTask(false);
+    }
+  };
+
+  const removeMember = async (memberId) => {
+    const member = project?.members?.find((item) => item._id === memberId);
+    const confirmed = window.confirm(
+      `Remove ${member?.name || "this member"} from this project? Assigned tasks for this member will also be removed.`
+    );
+
+    if (!confirmed) return;
+
+    setRemovingMemberId(memberId);
+    setMemberError("");
+
+    try {
+      await api.delete(`/projects/${id}/members/${memberId}`);
+      fetchData();
+    } catch (err) {
+      setMemberError(err.response?.data?.message || "Failed to remove member");
+    } finally {
+      setRemovingMemberId("");
+    }
+  };
+
+  const startEditTask = (task) => {
+    setEditTaskError("");
+    setEditingTaskId(task._id);
+    setEditTaskForm({
+      title: task.title || "",
+      description: task.description || "",
+      dueDate: toDateInputValue(task.dueDate),
+      priority: task.priority || "Medium",
+      status: task.status || "To Do",
+      assignedTo: task.assignedTo?._id || ""
+    });
+  };
+
+  const cancelEditTask = () => {
+    setEditingTaskId("");
+    setEditTaskError("");
+  };
+
+  const updateTask = async (e) => {
+    e.preventDefault();
+    setEditTaskError("");
+
+    if (!editTaskForm.title.trim()) {
+      setEditTaskError("Task title is required.");
+      return;
+    }
+
+    if (!editTaskForm.dueDate) {
+      setEditTaskError("Due date is required.");
+      return;
+    }
+
+    if (!editTaskForm.assignedTo) {
+      setEditTaskError("Please assign the task to a project member.");
+      return;
+    }
+
+    setSavingTaskId(editingTaskId);
+
+    try {
+      await api.put(`/tasks/${editingTaskId}`, editTaskForm);
+      setEditingTaskId("");
+      fetchData();
+    } catch (err) {
+      setEditTaskError(err.response?.data?.message || "Failed to update task");
+    } finally {
+      setSavingTaskId("");
     }
   };
 
@@ -245,18 +337,38 @@ export default function ProjectDetails() {
                   key={member._id}
                   className="rounded-[1.25rem] border border-slate-100 bg-slate-50 p-4"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-sm font-black text-cyan-700 shadow-sm">
-                      {getInitials(member.name)}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-sm font-black text-cyan-700 shadow-sm">
+                        {getInitials(member.name)}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate font-black text-slate-900">
+                          {member.name || "Member"}
+                        </p>
+                        <p className="truncate text-xs font-medium text-slate-500">
+                          {member.email}
+                        </p>
+                        <span className="mt-2 inline-flex rounded-full bg-white px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-slate-500">
+                          {member._id === project?.admin?._id ? "Admin" : "Member"}
+                        </span>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="truncate font-black text-slate-900">
-                        {member.name || "Member"}
-                      </p>
-                      <p className="truncate text-xs font-medium text-slate-500">
-                        {member.email}
-                      </p>
-                    </div>
+                    {isAdmin && member._id !== project?.admin?._id && (
+                      <button
+                        type="button"
+                        aria-label={`Remove ${member.name || "member"}`}
+                        className="rounded-2xl p-2 text-slate-400 transition hover:bg-red-50 hover:text-red-600"
+                        disabled={removingMemberId === member._id}
+                        onClick={() => removeMember(member._id)}
+                      >
+                        {removingMemberId === member._id ? (
+                          <Loader2 size={16} className="animate-spin" />
+                        ) : (
+                          <Trash2 size={16} />
+                        )}
+                      </button>
+                    )}
                   </div>
                 </div>
               ))
@@ -466,8 +578,17 @@ export default function ProjectDetails() {
                         key={task._id}
                         task={task}
                         isAdmin={isAdmin}
+                        members={project?.members || []}
+                        isEditing={editingTaskId === task._id}
                         isUpdating={updatingTaskId === task._id}
                         isDeleting={deletingTaskId === task._id}
+                        isSaving={savingTaskId === task._id}
+                        editTaskForm={editTaskForm}
+                        editTaskError={editTaskError}
+                        setEditTaskForm={setEditTaskForm}
+                        startEditTask={startEditTask}
+                        cancelEditTask={cancelEditTask}
+                        updateTask={updateTask}
                         updateStatus={updateStatus}
                         deleteTask={deleteTask}
                       />
@@ -492,8 +613,17 @@ export default function ProjectDetails() {
 function TaskCard({
   task,
   isAdmin,
+  members,
+  isEditing,
   isUpdating,
   isDeleting,
+  isSaving,
+  editTaskForm,
+  editTaskError,
+  setEditTaskForm,
+  startEditTask,
+  cancelEditTask,
+  updateTask,
   updateStatus,
   deleteTask
 }) {
@@ -508,6 +638,149 @@ function TaskCard({
     task.dueDate &&
     new Date(task.dueDate).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0) &&
     task.status !== "Done";
+
+  if (isEditing) {
+    return (
+      <form
+        onSubmit={updateTask}
+        className="rounded-[1.35rem] border border-cyan-200 bg-white p-4 shadow-xl shadow-cyan-900/5"
+      >
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h3 className="text-base font-black text-slate-950">Edit task</h3>
+          <button
+            type="button"
+            aria-label="Cancel edit"
+            className="rounded-2xl p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            onClick={cancelEditTask}
+            disabled={isSaving}
+          >
+            <X size={17} />
+          </button>
+        </div>
+
+        {editTaskError && (
+          <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+            {editTaskError}
+          </div>
+        )}
+
+        <div className="space-y-4">
+          <label>
+            <span className="label">Title</span>
+            <input
+              className="input"
+              value={editTaskForm.title}
+              disabled={isSaving}
+              onChange={(e) =>
+                setEditTaskForm({ ...editTaskForm, title: e.target.value })
+              }
+            />
+          </label>
+
+          <label>
+            <span className="label">Description</span>
+            <textarea
+              className="input min-h-24 resize-y"
+              value={editTaskForm.description}
+              disabled={isSaving}
+              onChange={(e) =>
+                setEditTaskForm({
+                  ...editTaskForm,
+                  description: e.target.value
+                })
+              }
+            />
+          </label>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label>
+              <span className="label">Due date</span>
+              <input
+                className="input"
+                type="date"
+                value={editTaskForm.dueDate}
+                disabled={isSaving}
+                onChange={(e) =>
+                  setEditTaskForm({ ...editTaskForm, dueDate: e.target.value })
+                }
+              />
+            </label>
+
+            <label>
+              <span className="label">Priority</span>
+              <select
+                className="input"
+                value={editTaskForm.priority}
+                disabled={isSaving}
+                onChange={(e) =>
+                  setEditTaskForm({ ...editTaskForm, priority: e.target.value })
+                }
+              >
+                <option>Low</option>
+                <option>Medium</option>
+                <option>High</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            <span className="label">Assign to</span>
+            <select
+              className="input"
+              value={editTaskForm.assignedTo}
+              disabled={isSaving}
+              onChange={(e) =>
+                setEditTaskForm({ ...editTaskForm, assignedTo: e.target.value })
+              }
+            >
+              <option value="">Assign to member</option>
+              {members.map((member) => (
+                <option key={member._id} value={member._id}>
+                  {member.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            <span className="label">Status</span>
+            <select
+              className="input"
+              value={editTaskForm.status}
+              disabled={isSaving}
+              onChange={(e) =>
+                setEditTaskForm({ ...editTaskForm, status: e.target.value })
+              }
+            >
+              <option>To Do</option>
+              <option>In Progress</option>
+              <option>Done</option>
+            </select>
+          </label>
+        </div>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <button className="btn-primary" disabled={isSaving}>
+            {isSaving ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <Save size={16} />
+            )}
+            Save
+          </button>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={cancelEditTask}
+            disabled={isSaving}
+          >
+            <X size={16} />
+            Cancel
+          </button>
+        </div>
+      </form>
+    );
+  }
 
   return (
     <article className="group rounded-[1.35rem] border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:border-cyan-200 hover:shadow-xl">
@@ -565,18 +838,30 @@ function TaskCard({
       </label>
 
       {isAdmin && (
-        <button
-          onClick={() => deleteTask(task._id)}
-          className="btn-danger mt-3 w-full"
-          disabled={isDeleting}
-        >
-          {isDeleting ? (
-            <Loader2 size={16} className="animate-spin" />
-          ) : (
-            <Trash2 size={16} />
-          )}
-          Delete task
-        </button>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => startEditTask(task)}
+            className="btn-secondary"
+            disabled={isDeleting}
+          >
+            <Pencil size={16} />
+            Edit
+          </button>
+          <button
+            type="button"
+            onClick={() => deleteTask(task._id)}
+            className="btn-danger"
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <Trash2 size={16} />
+            )}
+            Delete
+          </button>
+        </div>
       )}
     </article>
   );
@@ -632,6 +917,15 @@ function formatDate(value) {
     day: "numeric",
     year: "numeric"
   });
+}
+
+function toDateInputValue(value) {
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return date.toISOString().slice(0, 10);
 }
 
 function getInitials(name = "") {

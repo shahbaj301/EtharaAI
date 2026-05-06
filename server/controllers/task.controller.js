@@ -202,6 +202,16 @@ export const updateTask = async (req, res) => {
       });
     }
 
+    if (
+      req.body.assignedTo &&
+      !isMember(task.project, req.body.assignedTo)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Assigned user must be a project member"
+      });
+    }
+
     const allowedFields = [
       "title",
       "description",
