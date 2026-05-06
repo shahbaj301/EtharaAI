@@ -55,9 +55,6 @@ export default function Layout({ children }) {
               <h1 className="text-xl font-black tracking-tight text-slate-950">
                 TeamFlow
               </h1>
-              <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
-                Ethara AI Ready
-              </p>
             </div>
           </Link>
 
