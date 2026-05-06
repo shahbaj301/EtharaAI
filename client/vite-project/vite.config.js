@@ -8,5 +8,7 @@ export default defineConfig({
   plugins: [react(),
     // tailwindcss()
   ],
-  
+  preview: {
+    allowedHosts: ["frontend-production-d34e.up.railway.app"]
+  }
 })
