@@ -9,6 +9,6 @@ export default defineConfig({
     // tailwindcss()
   ],
   preview: {
-    allowedHosts: ["frontend-production-d34e.up.railway.app"]
+    allowedHosts: true
   }
 })
