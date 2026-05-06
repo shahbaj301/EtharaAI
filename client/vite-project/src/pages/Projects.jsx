@@ -62,17 +62,17 @@ export default function Projects() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-[2rem] bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 p-6 text-white shadow-soft sm:p-8">
+      <section className="card p-6 sm:p-8">
         <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
           <div>
-            <p className="badge bg-white/10 text-cyan-100 ring-1 ring-white/10">
+            <p className="badge bg-slate-100 text-slate-700">
               <FolderPlus size={14} />
               Project workspace
             </p>
-            <h1 className="mt-4 text-3xl font-black tracking-tight md:text-5xl">
+            <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
               Projects
             </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
               Create team spaces, manage members, and organize task boards
               without losing sight of ownership.
             </p>
@@ -234,11 +234,11 @@ export default function Projects() {
 
 function HeroMetric({ label, value }) {
   return (
-    <div className="rounded-[1.25rem] border border-white/10 bg-white/10 p-4">
-      <p className="text-xs font-bold uppercase tracking-wide text-slate-300">
+    <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
         {label}
       </p>
-      <p className="mt-2 text-2xl font-black text-white">{value}</p>
+      <p className="mt-2 text-2xl font-bold text-slate-950">{value}</p>
     </div>
   );
 }

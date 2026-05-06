@@ -44,46 +44,42 @@ button:disabled {
 @layer components {
   .app-shell {
     @apply min-h-screen bg-slate-50 text-slate-900;
-    background-image:
-      linear-gradient(135deg, rgba(15, 23, 42, 0.04) 0%, transparent 36%),
-      radial-gradient(circle at 1px 1px, rgba(15, 23, 42, 0.08) 1px, transparent 0);
-    background-size: auto, 28px 28px;
   }
 
   .input {
-    @apply w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400;
+    @apply w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-700 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400;
   }
 
   .label {
-    @apply mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500;
+    @apply mb-1.5 block text-sm font-semibold text-slate-700;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-slate-900/10 transition hover:-translate-y-0.5 hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:translate-y-0 disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:opacity-60;
   }
 
   .btn-accent {
-    @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-cyan-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-cyan-600/20 transition hover:-translate-y-0.5 hover:bg-cyan-700 focus:outline-none focus:ring-4 focus:ring-cyan-100 disabled:translate-y-0 disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:opacity-60;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100 disabled:translate-y-0 disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-200 disabled:opacity-60;
   }
 
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-bold text-red-600 transition hover:bg-red-100 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-100 disabled:opacity-60;
   }
 
   .card {
-    @apply rounded-[1.5rem] border border-slate-200/80 bg-white shadow-soft;
+    @apply rounded-lg border border-slate-200 bg-white shadow-sm;
   }
 
   .panel {
-    @apply rounded-[1.5rem] border border-slate-200/80 bg-white/90 shadow-soft backdrop-blur;
+    @apply rounded-lg border border-slate-200 bg-white shadow-sm;
   }
 
   .page-title {
-    @apply text-3xl font-black tracking-tight text-slate-950 md:text-4xl;
+    @apply text-2xl font-bold tracking-tight text-slate-950 md:text-3xl;
   }
 
   .page-subtitle {
@@ -91,11 +87,11 @@ button:disabled {
   }
 
   .badge {
-    @apply inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold;
+    @apply inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold;
   }
 
   .section-heading {
-    @apply text-lg font-black tracking-tight text-slate-950;
+    @apply text-lg font-bold tracking-tight text-slate-950;
   }
 
   .muted-text {
@@ -103,10 +99,10 @@ button:disabled {
   }
 
   .empty-state {
-    @apply rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50/70 p-8 text-center;
+    @apply rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center;
   }
 
   .skeleton {
-    @apply animate-pulse rounded-2xl bg-slate-200/80;
+    @apply animate-pulse rounded-md bg-slate-200;
   }
 }
